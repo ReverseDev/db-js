@@ -117,5 +117,24 @@ describe('DB', function() {
         done();
       });
     });
+
+    context('when passed a returning property.', function() {
+      it('should call the query method iwht the INSERT and RETURNING query.', function(done) {
+        db.insert({
+          into: 'table1',
+          columns: ['column1', 'column2'],
+          values: ['value1', 'value2'],
+          returning: ['column1', 'column2']
+        }).then(function() {
+          expect(client.query.calls[0].arguments[0])
+            .toEqual('INSERT INTO table1 (column1,column2) VALUES ($1,$2) RETURNING column1,column2;');
+
+          client.query.restore();
+          expect.restoreSpies();
+
+          done();
+        });
+      });
+    });
   });
 });

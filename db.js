@@ -1,15 +1,18 @@
 var _client;
+var _dbUri;
 
 /**
  * Function to set the current client of the database.
  * The client need to have a connect method.
  * @public
  * @param {Object} client new Client object
+ * @param {String} dbUri  Uri of the database
  */
-function setClient(client) {
+function setClient(client, dbUri) {
   'use strict';
 
   _client = client;
+  _dbUri = dbUri;
 }
 
 /**
@@ -21,7 +24,7 @@ function _connect() {
   'use strict';
 
   return new Promise(function(resolve, reject) {
-    _client.connect(function(error, client, done) {
+    _client.connect(_dbUri, function(error, client, done) {
       if (error) {
         reject(error);
         console.error('Connection error!', error);
@@ -131,6 +134,8 @@ function createInsertQuery(queryObj) {
 
   query += _createValuesQuery(queryObj.values);
 
+  query += _createReturningQuery(queryObj.returning);
+
   return query + ';';
 }
 
@@ -212,6 +217,28 @@ function _createValuesQuery(values) {
   }, query);
 
   return query + ')';
+}
+
+/**
+ * Function that return a string withe the RETURNING query.
+ * @private
+ * @param  {Array|String} returningColumns Array or String of values to be joined
+ * @return {String} with the joined values
+ */
+function _createReturningQuery(returningColumns) {
+  'use strict';
+
+  if (!returningColumns) {
+    return '';
+  }
+
+  var query = ' RETURNING ';
+
+  if (typeof returningColumns === 'string') {
+    return query + returningColumns;
+  } else if (returningColumns instanceof Array) {
+    return query + returningColumns.join(',');
+  }
 }
 
 module.exports = {

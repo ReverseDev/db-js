@@ -3,7 +3,7 @@
  */
 function Client() {}
 
-Client.prototype.connect = function(callback) {
+Client.prototype.connect = function(uri, callback) {
   callback(null, this, function() {});
 };
 
